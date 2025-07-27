@@ -1,33 +1,17 @@
-# Step 1: Build the React app
-FROM node:18-alpine as builder
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Copy source files
+# Copy package files and install dependencies
 COPY package*.json ./
-COPY . .
-
-# Install dependencies
 RUN npm install
 
-# Build the app for production
-RUN npm run build
+# Copy the rest of the frontend files
+COPY . .
 
-# Step 2: Serve the app using Nginx
-FROM nginx:alpine
+# Expose Vite Dev Server's default port
+EXPOSE 5173
 
-# Remove default nginx index page
-RUN rm -rf /usr/share/nginx/html/*
-
-# Copy built React app from builder
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copy custom nginx config (optional)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port 80
-EXPOSE 80
-
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Run the development server
+CMD ["npm", "run", "dev"]
